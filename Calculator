@@ -1,0 +1,31 @@
+import math
+
+def calculator():
+    print("Welcome to the Trigonometric Calculator!")
+    print("Choose an operation:")
+    print("1. Sine")
+    print("2. Cosine")
+    print("3. Tangent")
+    
+    operation = input("Enter the number corresponding to the operation (1/2/3): ")
+    
+    try:
+        angle = float(input("Enter the angle in degrees: "))
+        radians = math.radians(angle)  # Convert degrees to radians for trigonometric functions
+        
+        if operation == '1':
+            result = math.sin(radians)
+            print(f"Sine({angle}°) = {result}")
+        elif operation == '2':
+            result = math.cos(radians)
+            print(f"Cosine({angle}°) = {result}")
+        elif operation == '3':
+            result = math.tan(radians)
+            print(f"Tangent({angle}°) = {result}")
+        else:
+            print("Invalid operation! Please choose 1, 2, or 3.")
+    except ValueError:
+        print("Invalid input! Please enter a valid number for the angle.")
+
+# Run the calculator
+calculator()
