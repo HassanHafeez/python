@@ -1,0 +1,142 @@
+import random
+
+class Hangman:
+  def __init__(self):
+    self.word = self._select_word()
+    self.guessed_letters = ["_"] * len(self.word)
+    self.tries = 3
+    self.hint = self._generate_hint()
+
+  def _select_word(self):
+    words = ["Sun", "Run", "Pen"]
+    return random.choice(words)
+
+  def _generate_hint(self):
+    return self.word[0]
+
+  def display_hangman(self):
+    print(" ".join(self.guessed_letters))
+    print("Tries left: " + str(self.tries))
+    self.draw_hangman()
+
+  def draw_hangman(self):
+    stages = [  # final state: head, torso, both arms, and both legs
+                """
+                   --------
+                   |      |
+                   |      O
+                   |     \\|/
+                   |      |
+                   |     / \\
+                   -
+                """,
+                # head, torso, both arms, and one leg
+                """
+                   --------
+                   |      |
+                   |      O
+                   |     \\|/
+                   |      |
+                   |     / 
+                   -
+                """,
+                # head, torso, and both arms
+                """
+                   --------
+                   |      |
+                   |      O
+                   |     \\|/
+                   |      |
+                   |      
+                   -
+                """,
+                # head, torso, and one arm
+                """
+                   --------
+                   |      |
+                   |      O
+                   |     \\|
+                   |      |
+                   |     
+                   -
+                """,
+                # head and torso
+                """
+                   --------
+                   |      |
+                   |      O
+                   |      |
+                   |      |
+                   |     
+                   -
+                """,
+                # head
+                """
+                   --------
+                   |      |
+                   |      O
+                   |    
+                   |      
+                   |     
+                   -
+                """,
+                # initial empty state
+                """
+                   --------
+                   |      |
+                   |      
+                   |    
+                   |      
+                   |     
+                   -
+                """
+    ]
+    return stages[self.tries]
+
+  def guess_letter(self, letter):
+    if letter.lower() in self.word.lower():
+      for i in range(len(self.word)):
+        if self.word[i].lower() == letter.lower():
+          self.guessed_letters[i] = self.word[i]
+      print("Correct!")
+    else:
+      self.tries -= 1
+      print("Incorrect!")
+    self.display_hangman()
+
+  def play(self):
+    print("Welcome to Hangman!")
+    print("Guess a letter!")
+    while self.tries > 0:
+      letter = input("Enter a letter: ")
+      self.guess_letter(letter)
+      if "_" not in self.guessed_letters:
+        print("Congratulations! You saved me!")
+        self.menu()
+        break
+    else:
+      print("Ahhhh!!! I died! The word was " + self.word)
+      print(self.draw_hangman())
+      self.menu()
+
+  def menu(self):
+    print("Hangman Game Menu")
+    print("1. Play Game")
+    print("2. Get Hint")
+    print("3. Quit")
+    choice = input("Do you want to play again? (y/n): ")
+    if choice.lower() == "y":
+      self.__init__()
+      self.play()
+    elif choice.lower() == "n":
+      print("Goodbye!")
+    else:
+      print("Invalid choice. Please try again.")
+      self.menu()
+
+def main():
+  game = Hangman()
+  game.play()
+
+if __name__ == "__main__":
+  main()
