@@ -104,16 +104,28 @@ class Hangman:
       print("Incorrect!")
     self.display_hangman()
 
+  def guess_word(self, word):
+    if word.lower() == self.word.lower():
+      print("Congratulations! You guessed the word!")
+      self.menu()
+    else:
+      self.tries -= 1
+      print("Incorrect! Tries left: " + str(self.tries))
+      self.display_hangman()
+
   def play(self):
     print("Welcome to Hangman!")
-    print("Guess a letter!")
+    print("Guess a letter or the whole word!")
     while self.tries > 0:
-      letter = input("Enter a letter: ")
-      self.guess_letter(letter)
-      if "_" not in self.guessed_letters:
-        print("Congratulations! You saved me!")
-        self.menu()
-        break
+      guess = input("Enter a letter or the whole word: ")
+      if len(guess) == 1:
+        self.guess_letter(guess)
+        if "_" not in self.guessed_letters:
+          print("Congratulations! You guessed the word!")
+          self.menu()
+          break
+      else:
+        self.guess_word(guess)
     else:
       print("Ahhhh!!! I died! The word was " + self.word)
       print(self.draw_hangman())
