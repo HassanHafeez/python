@@ -1,0 +1,110 @@
+import datetime
+import hashlib
+
+class BankAccount:
+  def __init__(self, account_number, account_name, balance=0, pin=None):
+    self.account_number = account_number
+    self.account_name = account_name
+    self.balance = balance
+    self.pin = self._hash_pin(pin)
+    self.transaction_history = []
+    self.account_status = "active"
+
+  def _hash_pin(self, pin):
+    if pin is None:
+      return None
+    return hashlib.sha256(str(pin).encode()).hexdigest()
+
+  def deposit(self, amount, pin):
+    if self._verify_pin(pin):
+      self.balance += amount
+      self.transaction_history.append({"type": "deposit", "amount": amount, "timestamp": datetime.datetime.now()})
+      print(f"Deposited ${amount}. New balance is ${self.balance}")
+    else:
+      print("Invalid PIN")
+
+  def withdraw(self, amount, pin):
+    if self._verify_pin(pin):
+      if amount > self.balance:
+        print("Insufficient funds")
+      else:
+        self.balance -= amount
+        self.transaction_history.append({"type": "withdrawal", "amount": amount, "timestamp": datetime.datetime.now()})
+        print(f"Withdrew ${amount}. New balance is ${self.balance}")
+    else:
+      print("Invalid PIN")
+
+  def check_balance(self, pin):
+    if self._verify_pin(pin):
+      print(f"Current balance is ${self.balance}")
+    else:
+      print("Invalid PIN")
+
+  def get_transaction_history(self, pin):
+    if self._verify_pin(pin):
+      print("Transaction History:")
+      for transaction in self.transaction_history:
+        print(f"{transaction['type'].capitalize()}: ${transaction['amount']} at {transaction['timestamp']}")
+    else:
+      print("Invalid PIN")
+
+  def transfer(self, amount, recipient_account, pin):
+    if self._verify_pin(pin):
+      if amount > self.balance:
+        print("Insufficient funds")
+      else:
+        self.balance -= amount
+        recipient_account.balance += amount
+        self.transaction_history.append({"type": "transfer", "amount": amount, "recipient": recipient_account.account_name, "timestamp": datetime.datetime.now()})
+        recipient_account.transaction_history.append({"type": "transfer", "amount": amount, "sender": self.account_name, "timestamp": datetime.datetime.now()})
+        print(f"Transferred ${amount} to {recipient_account.account_name}")
+    else:
+      print("Invalid PIN")
+
+  def apply_interest(self, interest_rate, pin):
+    if self._verify_pin(pin):
+      interest_amount = self.balance * (interest_rate / 100)
+      self.balance += interest_amount
+      self.transaction_history.append({"type": "interest", "amount": interest_amount, "timestamp": datetime.datetime.now()})
+      print(f"Applied ${interest_amount} interest. New balance is ${self.balance}")
+    else:
+      print("Invalid PIN")
+
+  def _verify_pin(self, pin):
+    return self.pin == self._hash_pin(pin)
+
+  def freeze_account(self):
+    self.account_status = "frozen"
+    print("Account frozen")
+
+  def unfreeze_account(self):
+    self.account_status = "active"
+    print("Account unfrozen")
+
+# Create two new bank accounts with PINs
+account1 = BankAccount("123456789", "John Doe", 1000, 1234)
+account2 = BankAccount("987654321", "Jane Doe", 500, 5678)
+
+# Deposit $500 into account1 with PIN
+account1.deposit(500, 1234)
+
+# Transfer $200 from account1 to account2 with PIN
+account1.transfer(200, account2, 1234)
+
+# Apply 5% interest to account1 with PIN
+account1.apply_interest(5, 1234)
+
+# Get transaction history for account1 with PIN
+account1.get_transaction_history(1234)
+
+# Freeze account1
+account1.freeze_account()
+
+# Try to deposit $500 into account1 with PIN (should fail)
+account1.deposit(500, 1234)
+
+# Unfreeze account1
+account1.unfreeze_account()
+
+# Deposit $500 into account1 with PIN (should succeed)
+account1.deposit(500, 1234)
