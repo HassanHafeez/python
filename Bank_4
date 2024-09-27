@@ -1,0 +1,153 @@
+import datetime
+import hashlib
+import random
+
+class BankAccount:
+  def __init__(self, account_number, account_name, balance=0, pin=None):
+    self.account_number = account_number
+    self.account_name = account_name
+    self.balance = balance
+    self.pin = self._hash_pin(pin)
+    self.transaction_history = []
+    self.account_status = "active"
+    self.overdraft_limit = 0
+    self.interest_rate = 0
+    self.account_type = "checking"
+
+  def _hash_pin(self, pin):
+    if pin is None:
+      return None
+    return hashlib.sha256(str(pin).encode()).hexdigest()
+
+  def deposit(self, amount, pin):
+    if self._verify_pin(pin):
+      self.balance += amount
+      self.transaction_history.append({"type": "deposit", "amount": amount, "timestamp": datetime.datetime.now()})
+      print(f"Deposited ${amount}. New balance is ${self.balance}")
+    else:
+      print("Invalid PIN")
+
+  def withdraw(self, amount, pin):
+    if self._verify_pin(pin):
+      if amount > self.balance + self.overdraft_limit:
+        print("Insufficient funds")
+      else:
+        self.balance -= amount
+        self.transaction_history.append({"type": "withdrawal", "amount": amount, "timestamp": datetime.datetime.now()})
+        print(f"Withdrew ${amount}. New balance is ${self.balance}")
+    else:
+      print("Invalid PIN")
+
+  def check_balance(self, pin):
+    if self._verify_pin(pin):
+      print(f"Current balance is ${self.balance}")
+    else:
+      print("Invalid PIN")
+
+  def get_transaction_history(self, pin):
+    if self._verify_pin(pin):
+      print("Transaction History:")
+      for transaction in self.transaction_history:
+        print(f"{transaction['type'].capitalize()}: ${transaction['amount']} at {transaction['timestamp']}")
+    else:
+      print("Invalid PIN")
+
+  def transfer(self, amount, recipient_account, pin):
+    if self._verify_pin(pin):
+      if amount > self.balance + self.overdraft_limit:
+        print("Insufficient funds")
+      else:
+        self.balance -= amount
+        recipient_account.balance += amount
+        self.transaction_history.append({"type": "transfer", "amount": amount, "recipient": recipient_account.account_name, "timestamp": datetime.datetime.now()})
+        recipient_account.transaction_history.append({"type": "transfer", "amount": amount, "sender": self.account_name, "timestamp": datetime.datetime.now()})
+        print(f"Transferred ${amount} to {recipient_account.account_name}")
+    else:
+      print("Invalid PIN")
+
+  def apply_interest(self, pin):
+    if self._verify_pin(pin):
+      interest_amount = self.balance * (self.interest_rate / 100)
+      self.balance += interest_amount
+      self.transaction_history.append({"type": "interest", "amount": interest_amount, "timestamp": datetime.datetime.now()})
+      print(f"Applied ${interest_amount} interest. New balance is ${self.balance}")
+    else:
+      print("Invalid PIN")
+
+  def _verify_pin(self, pin):
+    return self.pin == self._hash_pin(pin)
+
+  def freeze_account(self):
+    self.account_status = "frozen"
+    print("Account frozen")
+
+  def unfreeze_account(self):
+    self.account_status = "active"
+    print("Account unfrozen")
+
+  def set_overdraft_limit(self, limit, pin):
+    if self._verify_pin(pin):
+      self.overdraft_limit = limit
+      print(f"Overdraft limit set to ${limit}")
+    else:
+      print("Invalid PIN")
+
+  def set_interest_rate(self, rate, pin):
+    if self._verify_pin(pin):
+      self.interest_rate = rate
+      print(f"Interest rate set to {rate}%")
+    else:
+      print("Invalid PIN")
+
+  def change_account_type(self, account_type, pin):
+    if self._verify_pin(pin):
+      self.account_type = account_type
+      print(f"Account type changed to {account_type}")
+    else:
+      print("Invalid PIN")
+
+  def generate_account_statement(self, pin):
+    if self._verify_pin(pin):
+      print("Account Statement:")
+      print(f"Account Number: {self.account_number}")
+      print(f"Account Name: {self.account_name}")
+      print(f"Account Type: {self.account_type}")
+      print(f"Balance: ${self.balance}")
+      print(f"Overdraft Limit: ${self.overdraft_limit}")
+      print(f"Interest Rate: {self.interest_rate}%")
+      print("Transaction History:")
+      for transaction in self.transaction_history:
+        print(f"{transaction['type'].capitalize()}: ${transaction['amount']} at {transaction['timestamp']}")
+    else:
+      print("Invalid PIN")
+
+class Bank:
+  def __init__(self):
+    self.accounts = {}
+
+  def create_account(self, account_number, account_name, balance=0, pin=None):
+    account = BankAccount(account_number, account_name, balance, pin)
+    self.accounts[account_number] = account
+    return account
+
+  def get_account(self, account_number):
+    return self.accounts.get(account_number)
+
+  def delete_account(self, account_number):
+    if account_number in self.accounts:
+      del self.accounts[account_number]
+      print("Account deleted")
+    else:
+      print("Account not found")
+
+bank = Bank()
+
+account1 = bank.create_account("123456789", "John Doe", 1000, 1234)
+account2 = bank.create_account("987654321", "Jane Doe", 500, 5678)
+
+account1.deposit(500, 1234)
+account1.transfer(200, account2, 1234)
+account1.apply_interest(1234)
+account1.generate_account_statement(1234)
+
+bank.delete_account("123456789")
