@@ -1,0 +1,14 @@
+from datetime import date
+
+def calculate_age(birth_year):
+    today = date.today()
+    age = today.year - birth_year
+    return age
+
+def main():
+    birth_year_input = int(input("Enter your birth year: "))
+    age = calculate_age(birth_year_input)
+    print(f"You are {age} years old.")
+
+if __name__ == "__main__":
+    main()
